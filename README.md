@@ -26,6 +26,8 @@ ARCA is a robust encryption tool designed for extreme portability and security. 
 
 - User-defined Authenticated Data for AEAD tag customization.
 
+![English](img/en.png)
+
 ---
 
 # ARCA - Cofre de Segredos ou Credenciais
@@ -55,6 +57,8 @@ ARCA é uma ferramenta robusta de criptografia projetada para extrema portabilid
 
 - Definição de Dados Autenticados pelo usuário para personalização da tag AEAD.
 
+![Portuguese](img/pt-br.png)
+
 ---
 
 # АРКА - Хранилище паролей и секретов
@@ -83,5 +87,7 @@ ARCA — это мощный инструмент шифрования, разр
 ### Ожидаемая функция
 
 - Пользовательские аутентифицированные данные для настройки метки AEAD.
+
+![Russian](img/ru.png)
 
 ---
