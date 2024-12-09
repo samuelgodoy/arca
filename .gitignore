@@ -1,0 +1,21 @@
+# Ignorar pastas e subpastas específicas
+.vscode/
+bin/
+build/
+
+# Ignorar arquivos de sistema do macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Ignorar arquivos de sistema do Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Ignorar arquivos de sistema do Linux
+*~
+
+# Ignorar arquivos de cache
+.cache/
+*.cache

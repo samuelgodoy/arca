@@ -1,0 +1,113 @@
+version: '3'
+# Variáveis globais utilizadas nas tarefas
+vars:
+  sources: "src/main.c src/aes.c src/scrypt.c src/trng.c"
+  include: "-Iinclude"
+  output_binary: "arca" # Nome base do binário de saída
+  SHELL: '{{if eq .OS "Windows_NT"}}powershell{{end}}{{if eq .OS "darwin"}}pwsh{{end}}'
+
+tasks:
+  default:
+    desc: "Exibe a ajuda com os comandos disponíveis"
+    cmds:
+      - task: help
+
+  help:
+    desc: "Mostra as opções disponíveis"
+    silent: true
+    cmds:
+      - echo "Comandos disponíveis:"
+      - echo "  task cosmocc  - Compilar executavel universal com cosmocc"
+      - echo "  task gcc      - Compilar usando gcc para o sistema atual"
+      - echo "  task zig-all  - Compilar usando zig para múltiplos targets"
+      - echo "  task zig      - Compilar usando zig para o sistema atual"
+      - echo "  task clean    - Limpar arquivos gerados"
+
+  prepare:
+    desc: "Cria a pasta bin"
+    cmds:
+      - '{{.SHELL}} mkdir -p bin || exit 0'
+
+  cosmocc:
+    desc: "Compila usando cosmocc"
+    deps:
+      - prepare
+    cmds:
+      - '{{.SHELL}} mkdir -p build/cosmocc || exit 0'
+      - |
+        # Compilação para PT-BR
+        cosmocc -o build/cosmocc/{{.output_binary}}-poliglota-pt_br.com {{.include}} \
+        -Oz -s -std=c17 -Wall -Wextra -Werror -DNDEBUG \
+        -DLANG_PT_BR \
+        -fomit-frame-pointer \
+        -ffunction-sections -fno-ident -fdata-sections \
+        -Wl,--gc-sections {{.sources}}
+      - '{{.SHELL}} mv build/cosmocc/{{.output_binary}}-poliglota-pt_br.com bin/ || exit 0'
+      - |
+        # Compilação para EN
+        cosmocc -o build/cosmocc/{{.output_binary}}-polyglot-en.com {{.include}} \
+        -Oz -s -std=c17 -Wall -Wextra -Werror -DNDEBUG \
+        -DLANG_EN \
+        -fomit-frame-pointer \
+        -ffunction-sections -fno-ident -fdata-sections \
+        -Wl,--gc-sections {{.sources}}
+      - '{{.SHELL}} mv build/cosmocc/{{.output_binary}}-polyglot-en.com bin/ || exit 0'
+      - |
+        # Compilação para RU
+        cosmocc -o build/cosmocc/{{.output_binary}}-полиглот-ru.com {{.include}} \
+        -Oz -s -std=c17 -Wall -Wextra -Werror -DNDEBUG \
+        -DLANG_RU \
+        -fomit-frame-pointer \
+        -ffunction-sections -fno-ident -fdata-sections \
+        -Wl,--gc-sections {{.sources}}
+      - '{{.SHELL}} mv build/cosmocc/{{.output_binary}}-полиглот-ru.com bin/ || exit 0'
+
+  gcc:
+    desc: "Compila usando gcc"
+    deps:
+      - prepare
+    cmds:
+      - '{{.SHELL}} mkdir -p build/gcc || exit 0'
+      - |
+        gcc -o build/gcc/{{.output_binary}}-gcc.com {{.include}} \
+        -O3 -std=c17 -Wall -Wextra -Werror -DNDEBUG \
+        -fstack-protector-strong -fno-plt \
+        -ffunction-sections -fdata-sections \
+        -Wl,--gc-sections {{.sources}}
+      - '{{.SHELL}} mv build/gcc/{{.output_binary}}-gcc.com bin/ || exit 0'
+
+  zig-all:
+    desc: "Compila usando zig cc para múltiplos targets de 64 bits"
+    deps:
+      - prepare
+    cmds:
+      - '{{.SHELL}} mkdir -p build/zig || exit 0'
+      - '{{.SHELL}} mkdir -p bin/zig || exit 0'
+      - zig cc -o build/zig/{{.output_binary}}-windows-amd64.exe {{.sources}} {{.include}} -O3 -std=c17 -Wall -Wextra -Werror -DNDEBUG -target x86_64-windows-gnu 
+      - '{{.SHELL}} mv build/zig/{{.output_binary}}-windows-amd64.exe bin/zig/ || exit 0'
+      - zig cc -o build/zig/{{.output_binary}}-linux-amd64 {{.sources}} {{.include}} -O3 -std=c17 -Wall -Wextra -Werror -DNDEBUG -target x86_64-linux-gnu 
+      - '{{.SHELL}} mv build/zig/{{.output_binary}}-linux-amd64 bin/zig/ || exit 0'
+      - zig cc -o build/zig/{{.output_binary}}-linux-aarch64 {{.sources}} {{.include}} -O3 -std=c17 -Wall -Wextra -Werror -DNDEBUG -target aarch64-linux-gnu 
+      - '{{.SHELL}} mv build/zig/{{.output_binary}}-linux-aarch64 bin/zig/ || exit 0'
+      - zig cc -o build/zig/{{.output_binary}}-darwin-amd64 {{.sources}} {{.include}} -O3 -std=c17 -Wall -Wextra -Werror -DNDEBUG -target x86_64-macos 
+      - '{{.SHELL}} mv build/zig/{{.output_binary}}-darwin-amd64 bin/zig/ || exit 0'
+      - zig cc -o build/zig/{{.output_binary}}-darwin-aarch64 {{.sources}} {{.include}} -O3 -std=c17 -Wall -Wextra -Werror -DNDEBUG -target aarch64-macos 
+      - '{{.SHELL}} mv build/zig/{{.output_binary}}-darwin-aarch64 bin/zig/ || exit 0'
+
+
+  zig:
+    desc: "Compila usando zig cc para o sistema atual"
+    deps:
+      - prepare
+    cmds:
+      - '{{.SHELL}} mkdir -p build/zig || exit 0'
+      - '{{.SHELL}} mkdir -p bin/zig || exit 0'
+      - zig cc -o build/zig/{{.output_binary}}-single.com {{.sources}} {{.include}} -O3 -std=c17 -Wall -Wextra -Werror -DNDEBUG
+      - '{{.SHELL}} mv build/zig/{{.output_binary}}-single.com bin/zig/ || exit 0'
+
+  clean:
+    desc: "Remove arquivos gerados"
+    cmds:
+      - '{{.SHELL}} rm -r bin/zig || exit 0'
+      - '{{.SHELL}} rm -r bin || exit 0'
+      - '{{.SHELL}} rm -r build || exit 0'
